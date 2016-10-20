@@ -46,6 +46,35 @@ nb = new base();
 					{
 						return this.getAttribute(args);
 					}
+					if (nb.isFunction(args))
+					{
+						return args(this);
+					}
+					if (nb.isJson(args))
+					{
+						try{
+							for(var item in args)
+								this.setAttribute(item, args[item]);
+							return true;
+						}catch(e){
+							//console.log(e.message);
+							return false;
+						}
+					}
+				}
+				if (numargs==2)
+				{
+					if (nb.isString(arguments[0]))
+					{
+						if (nb.isString(arguments[1]))
+						{
+							return this.setAttribute(arguments[0], arguments[1]);
+						}
+						if (nb.isFunction(arguments[1]))
+						{
+							return this.setAttribute(arguments[0], args(args));
+						}
+					}
 				}
 				//console.log(numargs);
 				//console.log(typeof(args));
@@ -138,5 +167,16 @@ nb = new base();
 			return obj instanceof Array;
 		}catch(e){return false;}
 	};
+	$.ready = function (fn){
+		if ( document.readyState === "complete" ){
+			setTimeout( fn, 100 );
+		}
+		else if ( document.addEventListener ) {
+            document.addEventListener( "DOMContentLoaded", fn, false );
+        }
+		else {
+            document.attachEvent( "onreadystatechange", fn );
+		}
+	}
     window.$ = $;
 })(window);
