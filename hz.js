@@ -178,5 +178,51 @@ nb = new base();
             document.attachEvent( "onreadystatechange", fn );
 		}
 	}
+	$.toLower = function (str){
+		return str.toLowerCase();
+	}
+	$.toUpper = function (str){
+		return str.toUpperCase();
+	}
+	$.chineseNumber = function (num)
+	{
+		if (isNaN(num) || num > Math.pow(10, 12))
+			return ""
+		var cn = "零壹贰叁肆伍陆柒捌玖"
+		var unit = new Array("拾百千", "分角")
+		var unit1 = new Array("万亿", "")
+		var numArray = num.toString().split(".")
+		var start = new Array(numArray[0].length - 1, 2)
+
+		function toChinese(num, index)
+		{
+			var num = num.replace(/\d/g, function($1)
+			{
+				return cn.charAt($1) + unit[index].charAt(start-- % 4 ? start % 4 : -1)
+			})
+			return num
+		}
+
+		for (var i = 0; i < numArray.length; i++)
+		{
+			var tmp = ""
+			for (var j = 0; j * 4 < numArray[i].length; j++)
+			{
+				var strIndex = numArray[i].length - (j + 1) * 4
+				var str = numArray[i].substring(strIndex, strIndex + 4)
+				var start = i ? 2 : str.length - 1
+				var tmp1 = toChinese(str, i)
+				tmp1 = tmp1.replace(/(零.)+/g, "零").replace(/零+$/, "")
+				tmp1 = tmp1.replace(/^壹拾/, "拾")
+				tmp = (tmp1 + unit1[i].charAt(j - 1)) + tmp
+			}
+			numArray[i] = tmp
+		}
+
+		numArray[1] = numArray[1] ? numArray[1] : ""
+		numArray[0] = numArray[0] ? numArray[0] + "元" : numArray[0], numArray[1] = numArray[1].replace(/^零+/, "")
+		numArray[1] = numArray[1].match(/分/) ? numArray[1] : numArray[1] + "整"
+		return numArray[0] + numArray[1]
+	}
     window.$ = $;
 })(window);
