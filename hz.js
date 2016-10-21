@@ -20,6 +20,82 @@ base = function(){
 			return obj instanceof Array;
 		}catch(e){return false;}
 	};
+	this.attr = function(_this, args, numargs)
+    {
+		var results = [];
+		for (var i=0;i<_this.length;i++)
+		{
+			if (numargs==1)
+			{
+				if (nb.isString(args[0]))
+				{
+                    results.push(_this[i].getAttribute(args[0]));
+				}
+				if (nb.isFunction(args[0]))
+				{
+                    results.push(args[0](this));
+                    //break;
+				}
+				if (nb.isJson(args[0]))
+				{
+					try{
+						for(var item in args[0])
+                            _this[i].setAttribute(item, args[0][item]);
+					}catch(e){
+                        results.push(false);
+					}
+				}
+			}
+			if (numargs==2)
+			{
+				if (nb.isString(args[0]))
+				{
+					if (nb.isString(args[1]))
+					{
+                        results.push(_this[i].setAttribute(args[0], args[1]));
+					}
+					if (nb.isFunction(args[1]))
+					{
+                        results.push(_this[i].setAttribute(args[0], args(args)));
+					}
+				}
+			}
+		}
+        if (_this.length==1)
+        {
+            if (results.length > 0)
+                return results[0];
+            else
+                return null;
+        }
+        else
+            return results;
+	}
+    this.removeattr = function(_this, args, numargs)
+    {
+        var results = [];
+        for (var i=0;i<_this.length;i++) {
+            if (nb.isString(args[0])) {
+                if (_this[i].hasAttribute(args[0]))
+                    results.push(_this[i].removeAttribute(args[0]));
+            }
+            if (nb.isArray(args[0])) {
+                for (var j=0;j<args[0].length;j++)
+                    if (nb.isString(args[0][j]))
+                        if (_this[i].hasAttribute(args[0][j]))
+                            results.push(_this[i].removeAttribute(args[0][j]));
+            }
+        }
+        if (_this.length==1)
+        {
+            if (results.length > 0)
+                return results[0];
+            else
+                return null;
+        }
+        else
+            return results;
+    }
 };
 nb = new base();
 (function(window){
@@ -33,58 +109,29 @@ nb = new base();
 		else
 		{
 			objs = document.querySelectorAll(selector);
-			objs[0].test3 = function()
-			{
-				alert('test3');
-			};
-			objs[0].attr = function(args)
-			{
-				var numargs = arguments.length;
-				if (numargs==1)
-				{
-					if (nb.isString(args))
-					{
-						return this.getAttribute(args);
-					}
-					if (nb.isFunction(args))
-					{
-						return args(this);
-					}
-					if (nb.isJson(args))
-					{
-						try{
-							for(var item in args)
-								this.setAttribute(item, args[item]);
-							return true;
-						}catch(e){
-							//console.log(e.message);
-							return false;
-						}
-					}
-				}
-				if (numargs==2)
-				{
-					if (nb.isString(arguments[0]))
-					{
-						if (nb.isString(arguments[1]))
-						{
-							return this.setAttribute(arguments[0], arguments[1]);
-						}
-						if (nb.isFunction(arguments[1]))
-						{
-							return this.setAttribute(arguments[0], args(args));
-						}
-					}
-				}
-				//console.log(numargs);
-				//console.log(typeof(args));
+			if (objs.length>1){
+                objs.attr = function (args) {
+                    return nb.attr(this, arguments, arguments.length);
+                }
+                objs.removeattr = function (args) {
+                    return nb.removeattr(this, arguments, arguments.length);
+                }
+				return objs;
 			}
-			return objs[0];
+			else if (objs.length==1){
+                objs[0].attr = function (args) {
+                    return nb.attr(objs, arguments, arguments.length);
+                }
+                objs[0].removeattr = function (args) {
+                    return nb.removeattr(objs, arguments, arguments.length);
+                }
+                return objs[0];
+			}
+			else return null;
 		}
         this.test2 = function(selector){
             alert(selector);
         };
-		
     };
 	$.ltrim = function (str)
 	{
