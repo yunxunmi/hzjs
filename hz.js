@@ -96,6 +96,29 @@ base = function(){
         else
             return results;
     }
+    this.html = function(_this, args, numargs)
+    {
+        var results = [];
+        for (var i=0;i<_this.length;i++) {
+            if (numargs==1){
+                if (nb.isString(args[0])) {
+                    _this[i].innerHTML = args[0];
+                }
+            }
+            else{
+                results.push(_this[i].innerHTML);
+            }
+        }
+        if (_this.length==1)
+        {
+            if (results.length > 0)
+                return results[0];
+            else
+                return null;
+        }
+        else
+            return results;
+    }
 };
 nb = new base();
 (function(window){
@@ -116,6 +139,9 @@ nb = new base();
                 objs.removeattr = function (args) {
                     return nb.removeattr(this, arguments, arguments.length);
                 }
+                objs.html = function (args) {
+                    return nb.html(this, arguments, arguments.length);
+                }
 				return objs;
 			}
 			else if (objs.length==1){
@@ -124,6 +150,9 @@ nb = new base();
                 }
                 objs[0].removeattr = function (args) {
                     return nb.removeattr(objs, arguments, arguments.length);
+                }
+                objs[0].html = function (args) {
+                    return nb.html(objs, arguments, arguments.length);
                 }
                 return objs[0];
 			}
