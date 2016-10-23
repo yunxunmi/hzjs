@@ -300,5 +300,50 @@ nb = new base();
 		numArray[1] = numArray[1].match(/分/) ? numArray[1] : numArray[1] + "整"
 		return numArray[0] + numArray[1]
 	}
+	$.floor = function(arg){
+		return Math.floor(arg)
+	}
+	$.ceil = function(arg){
+		return Math.ceil(arg)
+	}
+	$.round = function(arg){
+		return Math.round(arg)
+	}
+	$.floatFixed = function(arg,order){
+		return arg.toFixed(order)
+	}
+	$.floatMul = function(arg1,arg2){
+		var m=0,s1=arg1.toString(),s2=arg2.toString();
+		try{
+			m+=s1.split(".")[1].length;
+		}catch(e){}
+		try{
+			m+=s2.split(".")[1].length;
+		}catch(e){}
+		return Number(s1.replace(".","")*s2.replace(".","")/Math.pow(10,m))
+	}
+	$.floatAdd = function(arg1,arg2){
+		var r1=0,r2=0,s1=arg1.toString(),s2=arg2.toString();
+		try{
+			r1=s1.split(".")[1].length;
+		}catch(e){}
+		try{
+			r2=s2.split(".")[1].length;
+		}catch(e){}
+		m=Math.pow(10,Math.max(r1,r2))
+		return (arg1*m+arg2*m)/m
+	}
+	$.floatSub = function(arg1,arg2){
+		var r1,r2,m,n;
+		try{
+			r1=arg1.toString().split(".")[1].length
+		}catch(e){r1=0}
+		try{
+			r2=arg2.toString().split(".")[1].length
+		}catch(e){r2=0}
+		m=Math.pow(10,Math.max(r1,r2));
+		n=(r1>=r2)?r1:r2;
+		return ((arg1*m-arg2*m)/m).toFixed(n);
+	}
     window.$ = $;
 })(window);
