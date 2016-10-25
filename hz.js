@@ -119,6 +119,107 @@ base = function(){
         else
             return results;
     }
+	this.hascss = function(_this, args, numargs)
+	{
+		var results = [];
+		for (var i=0;i<_this.length;i++) {
+			if (nb.isString(args[0])) {
+				if (_this[i].hasAttribute(args[0]))
+					results.push(_this[i].removeAttribute(args[0]));
+			}
+			if (nb.isArray(args[0])) {
+				for (var j=0;j<args[0].length;j++)
+					if (nb.isString(args[0][j]))
+						if (_this[i].hasAttribute(args[0][j]))
+							results.push(_this[i].removeAttribute(args[0][j]));
+			}
+		}
+		if (_this.length==1)
+		{
+			if (results.length > 0)
+				return results[0];
+			else
+				return null;
+		}
+		else
+			return results;
+	}
+	this.css = function(_this, args, numargs)
+	{
+		var results = [];
+		for (var i=0;i<_this.length;i++)
+		{
+			if (numargs==1)
+			{
+				if (nb.isString(args[0]))
+				{
+					results.push(_this[i].getAttribute(args[0]));
+				}
+				if (nb.isFunction(args[0]))
+				{
+					results.push(args[0](this));
+					//break;
+				}
+				if (nb.isJson(args[0]))
+				{
+					try{
+						for(var item in args[0])
+							_this[i].setAttribute(item, args[0][item]);
+					}catch(e){
+						results.push(false);
+					}
+				}
+			}
+			if (numargs==2)
+			{
+				if (nb.isString(args[0]))
+				{
+					if (nb.isString(args[1]))
+					{
+						results.push(_this[i].setAttribute(args[0], args[1]));
+					}
+					if (nb.isFunction(args[1]))
+					{
+						results.push(_this[i].setAttribute(args[0], args(args)));
+					}
+				}
+			}
+		}
+		if (_this.length==1)
+		{
+			if (results.length > 0)
+				return results[0];
+			else
+				return null;
+		}
+		else
+			return results;
+	}
+	this.removecss = function(_this, args, numargs)
+	{
+		var results = [];
+		for (var i=0;i<_this.length;i++) {
+			if (nb.isString(args[0])) {
+				if (_this[i].hasAttribute(args[0]))
+					results.push(_this[i].removeAttribute(args[0]));
+			}
+			if (nb.isArray(args[0])) {
+				for (var j=0;j<args[0].length;j++)
+					if (nb.isString(args[0][j]))
+						if (_this[i].hasAttribute(args[0][j]))
+							results.push(_this[i].removeAttribute(args[0][j]));
+			}
+		}
+		if (_this.length==1)
+		{
+			if (results.length > 0)
+				return results[0];
+			else
+				return null;
+		}
+		else
+			return results;
+	}
 };
 nb = new base();
 (function(window){
@@ -142,6 +243,15 @@ nb = new base();
                 objs.html = function (args) {
                     return nb.html(this, arguments, arguments.length);
                 }
+				objs.hascss = function (args) {
+					return nb.hascss(this, arguments, arguments.length);
+				}
+				objs.css = function (args) {
+					return nb.css(this, arguments, arguments.length);
+				}
+				objs.removecss = function (args) {
+					return nb.removecss(this, arguments, arguments.length);
+				}
 				return objs;
 			}
 			else if (objs.length==1){
@@ -154,6 +264,15 @@ nb = new base();
                 objs[0].html = function (args) {
                     return nb.html(objs, arguments, arguments.length);
                 }
+				objs[0].hascss = function (args) {
+					return nb.hascss(objs, arguments, arguments.length);
+				}
+				objs[0].css = function (args) {
+					return nb.css(objs, arguments, arguments.length);
+				}
+				objs[0].removecss = function (args) {
+					return nb.removecss(objs, arguments, arguments.length);
+				}
                 return objs[0];
 			}
 			else return null;
@@ -345,5 +464,38 @@ nb = new base();
 		n=(r1>=r2)?r1:r2;
 		return ((arg1*m-arg2*m)/m).toFixed(n);
 	}
+    $.back = function()
+    {
+        historys  = JSON.parse(localStorage.getItem("historys"));
+        if (historys.length>0)
+        {
+            var idx = historys.indexOf(window.location.href);
+            if (idx)
+            {
+                window.location.href = historys[idx-1];
+            }
+        }
+    }
+    $.forward = function()
+    {
+        historys  = JSON.parse(localStorage.getItem("historys"));
+        if (historys.length>0)
+        {
+            var idx = historys.indexOf(window.location.href);
+            if (idx<historys.length-1)
+                window.location.href = historys[idx+1];
+        }
+    }
     window.$ = $;
+    $.ready(function(){
+        if (localStorage.getItem("historys"))
+        {
+            historys  = JSON.parse(localStorage.getItem("historys"));
+            if (historys.indexOf(window.location.href)<0)
+                historys[historys.length] = window.location.href;
+        }
+        else
+            historys[historys.length] = window.location.href;
+        localStorage.setItem("historys", JSON.stringify(historys));
+    });
 })(window);
