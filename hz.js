@@ -486,6 +486,16 @@ nb = new base();
                 window.location.href = historys[idx+1];
         }
     }
+    $.strTohtmlObject = function(str)
+    {
+        var htmlObject = document.createElement('div');
+        htmlObject.innerHTML = str;
+        if (htmlObject.childNodes.length==1)
+            return htmlObject.childNodes[0];
+        else
+            return htmlObject.childNodes;
+    }
+    String.prototype.tohtmlObject = function(){return $.strTohtmlObject(this)}
     window.$ = $;
     $.ready(function(){
         if (localStorage.getItem("historys"))
