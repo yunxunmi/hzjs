@@ -123,23 +123,41 @@ base = function(){
 	{
 		var results = [];
 		for (var i=0;i<_this.length;i++) {
+			results[i] = false;
 			if (nb.isString(args[0])) {
-				if (_this[i].hasAttribute(args[0]))
-					results.push(_this[i].removeAttribute(args[0]));
+				var obj_class = _this[i].className;
+				var obj_class_lst = obj_class.split(/\s+/);
+				var x = 0;
+				for(x in obj_class_lst) {
+					if(obj_class_lst[x] == args[0]) {
+						results[i] = true;
+					}
+				}
 			}
 			if (nb.isArray(args[0])) {
-				for (var j=0;j<args[0].length;j++)
-					if (nb.isString(args[0][j]))
-						if (_this[i].hasAttribute(args[0][j]))
-							results.push(_this[i].removeAttribute(args[0][j]));
+				for (var j=0;j<args[0].length;j++) {
+					results[j] = false;
+					if (nb.isString(args[0][j])) {
+						var obj_class = _this[i].className;
+						var obj_class_lst = obj_class.split(/\s+/);
+						var x = 0;
+						for (x in obj_class_lst) {
+							if (obj_class_lst[x] == args[0][j]) {
+								results[j] = true;
+							}
+						}
+					}
+				}
 			}
 		}
 		if (_this.length==1)
 		{
-			if (results.length > 0)
+			if (results.length == 1)
 				return results[0];
+			else if (results.length > 1)
+				return results;
 			else
-				return null;
+				return false;
 		}
 		else
 			return results;
@@ -147,50 +165,42 @@ base = function(){
 	this.css = function(_this, args, numargs)
 	{
 		var results = [];
-		for (var i=0;i<_this.length;i++)
-		{
-			if (numargs==1)
-			{
-				if (nb.isString(args[0]))
+		for (var i=0;i<_this.length;i++) {
+			results[i] = false;
+			if (nb.isString(args[0])) {
+				if (!this.hascss(_this, args, numargs))
 				{
-					results.push(_this[i].getAttribute(args[0]));
-				}
-				if (nb.isFunction(args[0]))
-				{
-					results.push(args[0](this));
-					//break;
-				}
-				if (nb.isJson(args[0]))
-				{
-					try{
-						for(var item in args[0])
-							_this[i].setAttribute(item, args[0][item]);
-					}catch(e){
-						results.push(false);
-					}
+					var obj_class = _this[i].className;
+					var blank = (obj_class != '') ? ' ' : '';
+					var added = obj_class + blank + args[0];
+					_this[i].className = added;
+					results[i] = true;
 				}
 			}
-			if (numargs==2)
-			{
-				if (nb.isString(args[0]))
-				{
-					if (nb.isString(args[1]))
-					{
-						results.push(_this[i].setAttribute(args[0], args[1]));
-					}
-					if (nb.isFunction(args[1]))
-					{
-						results.push(_this[i].setAttribute(args[0], args(args)));
+			if (nb.isArray(args[0])) {
+				for (var j=0;j<args[0].length;j++) {
+					results[j] = false;
+					if (nb.isString(args[0][j])) {
+						if (!this.hascss(_this, [args[0][j]], 1))
+						{
+							var obj_class = _this[i].className;
+							var blank = (obj_class != '') ? ' ' : '';
+							var added = obj_class + blank + args[0][j];
+							_this[i].className = added;
+							results[j] = true;
+						}
 					}
 				}
 			}
 		}
 		if (_this.length==1)
 		{
-			if (results.length > 0)
+			if (results.length == 1)
 				return results[0];
+			else if (results.length > 1)
+				return results;
 			else
-				return null;
+				return false;
 		}
 		else
 			return results;
@@ -199,23 +209,43 @@ base = function(){
 	{
 		var results = [];
 		for (var i=0;i<_this.length;i++) {
+			results[i] = false;
 			if (nb.isString(args[0])) {
-				if (_this[i].hasAttribute(args[0]))
-					results.push(_this[i].removeAttribute(args[0]));
+				if (this.hascss(_this, args, numargs))
+				{
+					var obj_class = ' '+_this[i].className+' ';
+					obj_class = obj_class.replace(/(\s+)/gi, ' ');
+					var removed = obj_class.replace(' '+args[0]+' ', ' ');
+					removed = removed.replace(/(^\s+)|(\s+$)/g, '');
+					_this[i].className = removed;
+					results[i] = true;
+				}
 			}
 			if (nb.isArray(args[0])) {
-				for (var j=0;j<args[0].length;j++)
-					if (nb.isString(args[0][j]))
-						if (_this[i].hasAttribute(args[0][j]))
-							results.push(_this[i].removeAttribute(args[0][j]));
+				for (var j=0;j<args[0].length;j++) {
+					results[j] = false;
+					if (nb.isString(args[0][j])) {
+						if (this.hascss(_this, [args[0][j]], 1))
+						{
+							var obj_class = ' '+_this[i].className+' ';
+							obj_class = obj_class.replace(/(\s+)/gi, ' ');
+							var removed = obj_class.replace(' '+args[0][j]+' ', ' ');
+							removed = removed.replace(/(^\s+)|(\s+$)/g, '');
+							_this[i].className = removed;
+							results[j] = true;
+						}
+					}
+				}
 			}
 		}
 		if (_this.length==1)
 		{
-			if (results.length > 0)
+			if (results.length == 1)
 				return results[0];
+			else if (results.length > 1)
+				return results;
 			else
-				return null;
+				return false;
 		}
 		else
 			return results;
@@ -466,10 +496,10 @@ nb = new base();
 	}
     $.back = function()
     {
-        historys  = JSON.parse(localStorage.getItem("historys"));
-        if (historys.length>0)
+		$.historys  = JSON.parse(localStorage.getItem("historys"));
+        if ($.historys.length>0)
         {
-            var idx = historys.indexOf(window.location.href);
+            var idx = $.historys.indexOf(window.location.href);
             if (idx)
             {
                 window.location.href = historys[idx-1];
@@ -478,12 +508,12 @@ nb = new base();
     }
     $.forward = function()
     {
-        historys  = JSON.parse(localStorage.getItem("historys"));
-        if (historys.length>0)
+        $.historys  = JSON.parse(localStorage.getItem("historys"));
+        if ($.historys.length>0)
         {
-            var idx = historys.indexOf(window.location.href);
-            if (idx<historys.length-1)
-                window.location.href = historys[idx+1];
+            var idx = $.historys.indexOf(window.location.href);
+            if (idx<$.historys.length-1)
+                window.location.href = $.historys[idx+1];
         }
     }
     $.strTohtmlObject = function(str)
@@ -496,16 +526,17 @@ nb = new base();
             return htmlObject.childNodes;
     }
     String.prototype.tohtmlObject = function(){return $.strTohtmlObject(this)}
+	$.historys = [];
     window.$ = $;
     $.ready(function(){
         if (localStorage.getItem("historys"))
         {
-            historys  = JSON.parse(localStorage.getItem("historys"));
-            if (historys.indexOf(window.location.href)<0)
-                historys[historys.length] = window.location.href;
+			$.historys  = JSON.parse(localStorage.getItem("historys"));
+            if ($.historys.indexOf(window.location.href)<0)
+				$.historys[$.historys.length] = window.location.href;
         }
         else
-            historys[historys.length] = window.location.href;
-        localStorage.setItem("historys", JSON.stringify(historys));
+			$.historys[$.historys.length] = window.location.href;
+        localStorage.setItem("historys", JSON.stringify($.historys));
     });
 })(window);
